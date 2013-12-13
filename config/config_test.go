@@ -5,7 +5,12 @@ import (
 	"testing"
 )
 
-var configStr = `{"version":"bogus"}`
+var configStr = `{
+	"version":"bogus",
+	"thing":{
+		"this": 6
+	}
+}`
 
 func getConfig() *Config {
 	buf := bytes.NewBufferString(configStr)
@@ -36,9 +41,58 @@ func TestGetKey(t *testing.T) {
 }
 
 func TestSetKey(t *testing.T) {
-	//t.Error("Not implemented")
+	config := getConfig()
+
+	err := config.SetKey("thing.that", "no")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err, val := config.GetKey("thing.that")
+	if err != nil {
+		t.Error(err)
+	}
+	if val != "no" {
+		t.Error("Key set incorrectly. Value:", val)
+	}
+
+	// [todo] - Set key for non-extant path should work
 }
 
 func TestFindVal(t *testing.T) {
-	findVal("my.dotted.path", "thing")
+	config := getConfig()
+	err, val := findVal("thing.this", config.values)
+	if err != nil {
+		t.Error(err)
+	}
+	if val != 6.0 {
+		t.Error("Did not find correct path. Got:", val)
+	}
+
+	err, val = findVal("thing.this.doesnt.exist", config.values)
+	if err == nil {
+		t.Error("Should not be able to find non-extant value:", val)
+	}
+}
+
+func TestSetVal(t *testing.T) {
+	config := getConfig()
+	err := setVal("thing.that", 10, config.values)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err, val := findVal("thing.that", config.values)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if val != 10 {
+		t.Error("Did not find correct path. Got:", val)
+	}
+
+	err = setVal("thing.this.doesnt.exist", 10, config.values)
+	if err == nil {
+		t.Error("Should not be able to find non-extant value:")
+	}
 }

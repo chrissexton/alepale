@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"strings"
 )
 
@@ -16,21 +17,44 @@ type Config struct {
 
 type Value interface{}
 
-func findVal(pathRemaining, key string) Value {
-	path := strings.Split(pathRemaining, ".")
-	if key == "" {
-		key = path[len(pathRemaining)-1]
-		pathRemaining = strings.Join(path[0:len(pathRemaining)-1], ".")
+// Run action on a path, gives the action the closest level of the struct
+func pathOp(path string, action func(string, map[string]interface{}) (error, Value), values map[string]interface{}) (error, Value) {
+	parts := strings.Split(path, ".")
+	key := parts[0]
+	remain := parts[1:]
+
+	if len(remain) == 0 {
+		return action(key, values)
 	}
-	return findVal(pathRemaining, key)
+
+	if reflect.TypeOf(values[key]) == reflect.TypeOf(map[string]interface{}{}) {
+		casted := values[key].(map[string]interface{})
+		return pathOp(strings.Join(remain, "."), action, casted)
+	}
+	return errors.New("Could not find key at path: " + path), nil
+}
+
+func setVal(path string, val interface{}, values map[string]interface{}) error {
+	err, _ := pathOp(path, func(key string, value map[string]interface{}) (error, Value) {
+		value[key] = val
+		return nil, nil
+	}, values)
+	return err
+}
+
+func findVal(path string, values map[string]interface{}) (error, Value) {
+	return pathOp(path, func(key string, value map[string]interface{}) (error, Value) {
+		return nil, value[key]
+	}, values)
 }
 
 // Reads a value out of a key path
 // Returns error if value at path is absent
 func (c *Config) GetKey(path string) (error, Value) {
-	val, ok := c.values[path]
-	if !ok {
-		return errors.New("Could not find config value for path: " + path), nil
+	err, val := findVal(path, c.values)
+	if err != nil {
+		log.Println(err)
+		return err, nil
 	}
 	return nil, val
 }
@@ -39,13 +63,17 @@ func (c *Config) GetKey(path string) (error, Value) {
 //
 // Returns errors when file is unsavable or key is unJSONable
 func (c *Config) SetKey(path string, value Value) error {
+	err := setVal(path, value, c.values)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 	return nil
 }
 
 // Reads new JSON config from reader interface
 // Errors obliterate program.
 func ReadConfig(cFile io.Reader) *Config {
-	log.Println("Reading config file")
 	file, e := ioutil.ReadAll(cFile)
 	if e != nil {
 		log.Fatal("Could not read config file")
@@ -62,8 +90,6 @@ func ReadConfig(cFile io.Reader) *Config {
 		log.Fatal("No version defined in config file")
 	}
 	c.Version = version.(string)
-
-	log.Printf("AlePale version %s read config\n", c.Version)
 
 	return &c
 }
