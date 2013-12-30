@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Alepale by chrissexton</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Alepale</h1>
+        <h2>An IRC bot that learns and acts very obnoxiously.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/chrissexton/alepale/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/chrissexton/alepale/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/chrissexton/alepale" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a name="alepale" class="anchor" href="#alepale"><span class="octicon octicon-link"></span></a>AlePale</h1>
+
+<p><a href="http://travis-ci.org/chrissexton/alepale"><img src="https://api.travis-ci.org/chrissexton/alepale.png" alt="Build Status"></a></p>
+
+<p>AlePale is a bot that trolls our little corner of the IRC world and keeps our friends laughing from time to time. Sometimes he makes us angry too. He is crafted as a clone of XKCD's Bucket bot, which learns from things he's told and regurgitates his knowledge to the various channels that he lives in. I've found in many such projects that randomness can often make bots feel much more alive than they are, so AlePale is a big experiment in how great randomness is.</p>
+
+<ul>
+<li><a href="http://chrissexton.org/projects/alepale">Project Page</a></li>
+</ul><h2>
+<a name="getting-help" class="anchor" href="#getting-help"><span class="octicon octicon-link"></span></a>Getting Help</h2>
+
+<p>The bot has some very basic help functions built in. Just ask for help and he'll give it to you!</p>
+
+<blockquote>
+<p>Chris: AlePale, help</p>
+
+<p>AlePale: Help topics: about variables, talker, remember, admin, factoid, beers, skeleton</p>
+
+<p>Chris: AlePale, help about</p>
+
+<p>AlePale: Hi, I'm based on godeepintir version 0.81. I'm written in Go, and you can find my source code on the internet here: <a href="http://bitbucket.org/phlyingpenguin/godeepintir">http://bitbucket.org/phlyingpenguin/godeepintir</a></p>
+</blockquote>
+
+<h2>
+<a name="factoids" class="anchor" href="#factoids"><span class="octicon octicon-link"></span></a>Factoids</h2>
+
+<p>The primary interaction with AlePale is through factoids. These are simply just statements which can be taught to the bot and triggered at a later time. They may be triggered via the text specified in a factoid, or they may be triggered randomly by the bot when the room is silent. A simple factoid takes the shape of some trigger text, a verb, and the body of the factoid. By default, the verb is included in the full text that the bot repeats, but there are two special verbs, &lt;reply&gt; and &lt;action&gt; which do not come out in the final message.</p>
+
+<p>An example:</p>
+
+<blockquote>
+<p>Chris: AlePale, Chris &lt;is&gt; amazing.</p>
+
+<p>AlePale: Okay Chris.</p>
+
+<p>Chris: AlePale, Chris</p>
+
+<p>AlePale: Chris is amazing.</p>
+</blockquote>
+
+<p>When teaching facts, verbs are always enclosed with &lt;&gt;, no exceptions. Using &lt;reply&gt; causes AlePale to reply with only the body text, omitting both the verb and the trigger. Using &lt;action&gt; is similar to the &lt;reply&gt; verb except he sends an IRC action (/me) instead of a regular reply.</p>
+
+<p>Factoids can be removed by telling the bot, "forget that." They can be searched and updated using the =~ operator. This works by giving a trigger, the operator, and an RE2 compatible regular expression. For example, "AlePale: Chris =~ s/amazing/the best/" would update the previous factoid to be more accurate.</p>
+
+<h3>
+<a name="variables" class="anchor" href="#variables"><span class="octicon octicon-link"></span></a>Variables</h3>
+
+<p>There are a few variables cooked into the bot that allow some randomness within a fact. Putting the variable in the body of a message will cause it to be replaced by an entry from the database for a given variable.</p>
+
+<p>Current entries:</p>
+
+<ul>
+<li>$who - The person who triggered the factoid. (Random person if nobody triggered.)</li>
+<li>$someone - Anybody in the channel</li>
+<li>$digit - 0-9</li>
+<li>$nonzero - 1-9</li>
+<li>$verb, $verbs, $verbing - All common verbs in three forms</li>
+<li>$noun - All common nouns</li>
+<li>$color - Several real life colors</li>
+<li>$mood - Is he happy?</li>
+<li>$bodypart - A random body part. There are lots.</li>
+<li>$beer - A random beer name</li>
+<li>$swear - A random swear</li>
+<li>$me - The bot's IRC handle</li>
+</ul><h2>
+<a name="quotes" class="anchor" href="#quotes"><span class="octicon octicon-link"></span></a>Quotes</h2>
+
+<p>Quotes are technically equivalent to factoids, but there is some syntactic sugar to make life easier for the members of the channel. The bot will remember what somebody said if he is told to. Later, he may trigger the fact randomly just like any other factoid and a tiny morsel of out of context quotation can appear, or the library of quotes from the user in question can be triggered manually.</p>
+
+<p>An example:</p>
+
+<blockquote>
+<p>Chris: Everything I say is great.</p>
+
+<p>Jordan: AlePale, remember Chris Everything</p>
+
+<p>AlePale: Okay Jordan. Remembering what Chris said about Everything.</p>
+
+<p>Jordan: AlePale, Chris quotes</p>
+
+<p>AlePale: Chris: Everything I say is great.</p>
+</blockquote>
+
+<h2>
+<a name="beers" class="anchor" href="#beers"><span class="octicon octicon-link"></span></a>Beers</h2>
+
+<p>One of the fun parts about AlePale is that he remembers how many beers we have. Gamification of our drinking habits is a great motivator to get out and have more beer, so he will keep track. The keywords to know are: beers, beers++, beers = X (where X is an integer), and puke. Upon puking, your beer count is reset. Otherwise, the functionality is obvious. The spacing on "beers++" and "beers = X" is important. He also knows "bourbon++" if you're drinking something else. This counts as two beers, use sparingly!</p>
+
+<h3>
+<a name="untappd" class="anchor" href="#untappd"><span class="octicon octicon-link"></span></a>Untappd</h3>
+
+<p>One small improvement for the beer tracker is integration into <a href="http://untappd.com">Untappd</a>. By being friends with the <a href="https://untappd.com/user/phlyingpenguin">bot owner</a>, you can then tell the bot in the channel who you are and then he will automatically count beer check-ins as beers in the channel. He'll also display what the beer is and include the comment and location entered on Untappd so that your friends can be jealous and you can put in some smack talk. To register your Untappd user name, just tell the bot "reguntappd "</p>
+
+<h2>
+<a name="other-randomer-things" class="anchor" href="#other-randomer-things"><span class="octicon octicon-link"></span></a>Other, randomer things</h2>
+
+<p>The saga of bots in our channel started out with a simple bot named FredFelps which would just reply about how God hates our users at various times when they talked about the real Felps. This is still a tradition that AlePale keeps up, but could be easily modified to fit somebody else's needs.</p>
+
+<p>We're also a bit OCD about the length of the IRC nicks that people use. As it turns out, if everybody agrees on a particular length, say 9 characters, then the messages and names all line up very nicely when using a fixed-width font. We like 9 characters.</p>
+
+<p>Unwelcome messages also help to deter people from violating our CDO. Upon joining, users are told that they really ought to try using screen or an IRC bouncer, or just that they're terrible people. The theory is that they are terrible people.</p>
+
+<p>You can use the bot to perform die rolls (character sheets may be on the way!)
+by issuing a single word command in the form of XdY. "1d20" would roll a single
+20-sided die, and "4d6" would roll four 6-sided dice.</p>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<pre><code>            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar &lt;sam@hocevar.net&gt;
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+</code></pre>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
