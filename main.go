@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import "log"
 
 func main() {
-	fmt.Println("Welcome to the new AlePale!")
+	log.Println("Welcome to the new AlePale!")
+	// Load config
+
+	// Create bot
+
+	// Stitch together plugin pipeline
 }

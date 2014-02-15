@@ -8,7 +8,11 @@ import (
 	"log"
 	"reflect"
 	"strings"
+
+	r "github.com/dancannon/gorethink"
 )
+
+var session *r.Session
 
 type Config struct {
 	values  map[string]interface{}
@@ -90,6 +94,15 @@ func ReadConfig(cFile io.Reader) *Config {
 		log.Fatal("No version defined in config file")
 	}
 	c.Version = version.(string)
+
+	session, err = r.Connect(map[string]interface{}{
+		"address":  "localhost:28015",
+		"database": "test",
+		"authkey":  "14daak1cad13dj",
+	})
+	if err != nil {
+		err.Error()
+	}
 
 	return &c
 }
