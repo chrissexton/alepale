@@ -12,9 +12,9 @@ func setupService() {
 	log.Println("Making service")
 	service.NewChanService(in, out)
 	log.Println("Sending a message to chan")
-	out <- "testing"
+	in <- "testing"
 	log.Println("Waiting for message back")
-	val := <-in
+	val := <-out
 	log.Println("Got message back")
 	log.Println("Got value:", val)
 }
