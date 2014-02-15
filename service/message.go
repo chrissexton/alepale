@@ -1,6 +1,12 @@
 package service
 
+const BUFF_SZ = 10
+
 type MessageChan chan Message
+
+func NewMessageChan() MessageChan {
+	return make(MessageChan, BUFF_SZ)
+}
 
 // Representation of a single event from a service to the bot
 type Message struct {

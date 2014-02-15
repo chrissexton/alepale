@@ -19,7 +19,7 @@ func TestChanService(t *testing.T) {
 	val := <-out
 	t.Log("Got message back")
 	if val.Text != "testing" {
-		t.Errorf("Did not recieve good value: %s", val)
+		t.Errorf("Did not recieve good value: %s", val.Text)
 	}
 	t.Log("Got value:", val.Text)
 }
