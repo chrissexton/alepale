@@ -1,6 +1,6 @@
-package bot
+package service
 
-import "github.com/chrissexton/alepale/service"
+type MessageChan chan Message
 
 // Representation of a single event from a service to the bot
 type Message struct {
@@ -8,7 +8,7 @@ type Message struct {
 	User *User
 
 	// Which service the user was operating through
-	Service *service.Service
+	Service *Service
 
 	// Which channel the user was operating on
 	Channel *Channel
@@ -24,7 +24,7 @@ type Message struct {
 }
 
 // Create a new message for procesing
-func NewMessage(u *User, s *service.Service, ch *Channel, txt string, data ...interface{}) Message {
+func NewMessage(u *User, s *Service, ch *Channel, txt string, data ...interface{}) Message {
 	processed := false
 	if len(data) > 0 {
 		switch data[0].(type) {
@@ -49,4 +49,7 @@ type Log []Message
 
 // Distributes the message to the services by which it should be sent
 func (m *Message) Send() {
+	srv := *m.Service
+	_, out := srv.GetChan()
+	out <- *m
 }

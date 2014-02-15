@@ -1,28 +1,31 @@
 package service
 
-import (
-	"log"
-	"testing"
-)
+import "testing"
+
+func makeMessage(s Service, text string) Message {
+	u := NewUser("biff")
+	ch := NewChannel("woo")
+	return NewMessage(u, &s, ch, text)
+}
 
 // Just test to see that it don't blow up
 func TestChanService(t *testing.T) {
-	in, out := make(chan string, 10), make(chan string, 10)
-	log.Println("Making service")
-	NewChanService(in, out)
-	log.Println("Sending a message to chan")
-	in <- "testing"
-	log.Println("Waiting for message back")
+	in, out := make(MessageChan, 10), make(MessageChan, 10)
+	t.Log("Making service")
+	s := *NewChanService(in, out)
+	t.Log("Sending a message to chan")
+	in <- makeMessage(s, "testing")
+	t.Log("Waiting for message back")
 	val := <-out
-	log.Println("Got message back")
-	if val != "testing" {
+	t.Log("Got message back")
+	if val.Text != "testing" {
 		t.Errorf("Did not recieve good value: %s", val)
 	}
-	log.Println("Got value:", val)
+	t.Log("Got value:", val.Text)
 }
 
 func TestGetChan(t *testing.T) {
-	in, out := make(chan string, 10), make(chan string, 10)
+	in, out := make(MessageChan, 10), make(MessageChan, 10)
 	s := NewChanService(in, out)
 	actualIn, actualOut := s.GetChan()
 
@@ -34,9 +37,9 @@ func TestGetChan(t *testing.T) {
 		t.Fail()
 	}
 
-	actualIn <- "testing"
+	actualIn <- makeMessage(s, "testing")
 	val := <-actualOut
-	if val != "testing" {
+	if val.Text != "testing" {
 		t.Fail()
 	}
 }

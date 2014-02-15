@@ -1,15 +1,18 @@
 package service
 
+// Interface for interacting with services
 type Service interface {
-	GetChan() (chan string, chan string)
+	GetChan() (MessageChan, MessageChan)
 }
 
+// Simple pipe service, stores two chans and pipes between them
 type ChanService struct {
-	in  chan string
-	out chan string
+	in  MessageChan
+	out MessageChan
 }
 
-func NewChanService(in chan string, out chan string) *ChanService {
+// Create simple pipe service
+func NewChanService(in MessageChan, out MessageChan) *ChanService {
 	service := &ChanService{
 		in:  in,
 		out: out,
@@ -18,15 +21,17 @@ func NewChanService(in chan string, out chan string) *ChanService {
 	return service
 }
 
-func (s *ChanService) GetChan() (chan string, chan string) {
+// Public interface method to get I/O for the service
+func (s ChanService) GetChan() (MessageChan, MessageChan) {
 	return s.in, s.out
 }
 
 // Just return whatever they sent
-func (s *ChanService) handleMessage(val string) string {
+func (s *ChanService) handleMessage(val Message) Message {
 	return val
 }
 
+// goroutine for background processing of the channel
 func (s *ChanService) manageChan() {
 	for {
 		select {
