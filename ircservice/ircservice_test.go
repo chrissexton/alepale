@@ -1,12 +1,17 @@
 package ircservice
 
-import "testing"
+import (
+	"log"
+	"testing"
+)
 
 func TestIrcService(t *testing.T) {
-	server := "irc.freenode.net"
+	server := "irc.freenode.net:6667"
 	svc := NewIrcService(server)
 
-	if svc.Server != server {
+	log.Println("test")
+
+	if svc.server != server {
 		t.Fail()
 	}
 }
