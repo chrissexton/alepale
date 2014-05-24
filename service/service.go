@@ -15,12 +15,12 @@ type ChanService struct {
 
 // Create simple pipe service
 func NewChanService(in MessageChan, out MessageChan) *ChanService {
-	service := &ChanService{
+	service := ChanService{
 		in:  in,
 		out: out,
 	}
 	go service.manageChan()
-	return service
+	return &service
 }
 
 // Public interface method to get I/O for the service

@@ -30,3 +30,17 @@ func TestProcessedMessage(t *testing.T) {
 		t.Error("Incorrect data segment on message:", m.Data)
 	}
 }
+
+func TestNewMessageChan(t *testing.T) {
+	c := NewMessageChan()
+	if BUFF_SZ != cap(c) {
+		t.Errorf("Channel returned is of incorrect capacity: %d", cap(c))
+	}
+}
+
+func TestSend(t *testing.T) {
+	in, out := make(MessageChan, 10), make(MessageChan, 10)
+	s := NewChanService(in, out)
+	m := NewMessage(nil, s, nil, "test")
+	m.Send()
+}

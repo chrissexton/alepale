@@ -7,7 +7,7 @@ import "testing"
 func makeMessage(s Service, text string) Message {
 	u := NewUser("biff")
 	ch := NewChannel("woo")
-	return NewMessage(u, &s, ch, text)
+	return NewMessage(u, s, ch, text)
 }
 
 // Just test to see that it don't blow up
