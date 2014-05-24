@@ -5,7 +5,7 @@ package service
 import "testing"
 
 func TestNewChannelUsrs(t *testing.T) {
-	users := make([]*User, 0)
+	users := make(map[string]*User, 0)
 	ch := NewChannelUsers("woo", users)
 
 	if ch.Name != "woo" {
@@ -28,7 +28,7 @@ func TestNewChannelUsrs(t *testing.T) {
 }
 
 func TestNewChannel(t *testing.T) {
-	users := make([]*User, 0)
+	users := make(map[string]*User, 0)
 	ch := NewChannel("woo")
 
 	if ch.Name != "woo" {
@@ -61,7 +61,7 @@ func TestAddUser(t *testing.T) {
 		t.Fail()
 	}
 
-	if ch.Users[0] != user {
+	if ch.Users[user.Name] != user {
 		t.Fail()
 	}
 }

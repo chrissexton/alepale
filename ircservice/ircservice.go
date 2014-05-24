@@ -3,10 +3,14 @@
 package ircservice
 
 import (
+	"fmt"
+	"log"
 	"time"
 
-	"code.google.com/p/velour/irc"
 	svc "github.com/chrissexton/alepale/service"
+	irc "github.com/fluffle/goirc/client"
+
+	"github.com/chrissexton/alepale/service"
 )
 
 const (
@@ -30,15 +34,15 @@ type IrcService struct {
 	in  svc.MessageChan
 	out svc.MessageChan
 
-	server   string
 	nick     string
-	fullName string
-	password string
 	channels []string
 
-	client *irc.Client
-
+	// Signal anybody else that we've exited
 	Quit chan bool
+
+	client *irc.Conn
+
+	*irc.Config
 }
 
 func NewIrcService(server string, nick string) *IrcService {
@@ -48,12 +52,47 @@ func NewIrcService(server string, nick string) *IrcService {
 	ircSvc := IrcService{
 		in:       in,
 		out:      out,
+		nick:     nick,
 		channels: make([]string, 0),
 		Quit:     make(chan bool),
+		Config:   irc.NewConfig(nick),
 	}
-	ircSvc.nick = nick
-	ircSvc.server = server
-	ircSvc.channels = make([]string, 0)
+
+	ircSvc.Server = server
 
 	return &ircSvc
+}
+
+// Start the IRC connection
+func (i *IrcService) Start() {
+	i.client = irc.SimpleClient(i.nick)
+
+	i.client.HandleFunc(irc.DISCONNECTED, func(conn *irc.Conn, line *irc.Line) {
+		log.Println("IrcService#Start disconnecting")
+		i.Quit <- true
+	})
+
+	i.client.HandleFunc(irc.PRIVMSG, func(conn *irc.Conn, line *irc.Line) {
+		i.out <- i.convertLine(line)
+	})
+
+	log.Println("IrcService#Start connecting")
+	if err := i.client.ConnectTo(i.Server); err != nil {
+		fmt.Printf("Connection error: %s\n", err)
+	}
+}
+
+func (i *IrcService) Disconnect(message string) {
+	i.client.Quit(message)
+}
+
+// Public interface method to get I/O for the service
+func (i *IrcService) GetChan() (service.MessageChan, service.MessageChan) {
+	return i.in, i.out
+}
+
+func (i *IrcService) convertLine(line *irc.Line) service.Message {
+	ch := service.NewChannel(line.Target())
+	u := ch.Users[line.Nick]
+	return service.NewMessage(u, i, ch, line.Text(), line)
 }
