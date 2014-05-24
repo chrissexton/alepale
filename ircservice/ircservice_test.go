@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
+// Online tests
 func TestIrcService(t *testing.T) {
 	server := "irc.freenode.net:6667"
-	svc := NewIrcService(server)
-
-	log.Println("test")
+	log.Println("test service about to be created")
+	svc := NewIrcService(server, "alepaletest")
 
 	if svc.server != server {
 		t.Fail()

@@ -44,7 +44,7 @@ type IrcService struct {
 	Quit chan bool
 }
 
-func NewIrcService(server string) *IrcService {
+func NewIrcService(server string, nick string) *IrcService {
 	in, out := svc.NewMessageChan(), svc.NewMessageChan()
 
 	// Apparently you can't specify keys properly when using anonymous fields!?
@@ -54,11 +54,12 @@ func NewIrcService(server string) *IrcService {
 		channels: make([]string, 0),
 		Quit:     make(chan bool),
 	}
+	ircSvc.nick = nick
 	ircSvc.server = server
 	ircSvc.channels = make([]string, 0)
 
 	go ircSvc.manageChan()
-	ircSvc.start()
+	go ircSvc.start()
 
 	return &ircSvc
 }
@@ -66,19 +67,21 @@ func NewIrcService(server string) *IrcService {
 func (s *IrcService) start() {
 	client, err := irc.DialServer(s.server,
 		s.nick,
-		s.fullName,
+		"test",
 		s.password)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Fatal: %s", err)
 	}
 
 	s.client = client
 
-	s.handleConnection()
+	log.Println("passing off the connection to the handlers")
+	go s.handleConnection()
 }
 
 func (s *IrcService) handleConnection() {
+	log.Println("#handleConnection starting")
 	t := time.NewTimer(pingTime)
 
 	defer func() {
@@ -95,6 +98,7 @@ func (s *IrcService) handleConnection() {
 	for {
 		select {
 		case msg, ok := <-s.client.In:
+			log.Println("#handleConnection got message:", msg, ok)
 			if !ok { // disconnect
 				return
 			}
@@ -103,10 +107,12 @@ func (s *IrcService) handleConnection() {
 			s.handleIncomming(msg)
 
 		case <-t.C:
+			log.Println("#handleConnection sending ping")
 			s.client.Out <- irc.Msg{Cmd: irc.PING, Args: []string{s.client.Server}}
 			t = time.NewTimer(pingTime)
 
 		case err, ok := <-s.client.Errors:
+			log.Println("#handleConnection got error:", err, ok)
 			if ok && err != io.EOF {
 				log.Println(err)
 				return
